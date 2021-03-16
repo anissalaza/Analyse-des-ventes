@@ -1,0 +1,2637 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Analysez les ventes d'une entreprise de e-commerce"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Mise en situation"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Vous êtes data analyst d'une grande chaîne de librairie, fraîchement embauché depuis une semaine !  \n",
+    "Il est temps de mettre les mains dans le cambouis ! Le service Informatique vous a donné l’accès à la base de données des ventes. À vous de vous familiariser avec les données, et de les analyser. Votre manager souhaite que vous réalisiez une présentation pour vous \"faire la main\".  \n",
+    "Comme vous l'avez appris dans vos recherches avant de postuler, votre entreprise, _\"Rester livres\"_ s'est d'abord développée dans une grande ville de France, avec plusieurs magasins, jusqu'à décider d'ouvrir une boutique en ligne. Son approche de la vente de livres en ligne, basée sur des **algorithmes de recommandation**, lui a valu un franc succès !"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Importation des modules"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "_Importation des modules nécessaires pour le nettoyage des données._"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import numpy as np"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Chargement des données"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "_On procède au chargement du jeu de données composé de trois fichiers au format csv._"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "'/Users/anissa'"
+      ]
+     },
+     "execution_count": 2,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "%pwd"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "/Users/anissa/dataset_P4\n"
+     ]
+    }
+   ],
+   "source": [
+    "%cd /Users/anissa/dataset_P4"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "***csv customers***"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>client_id</th>\n",
+       "      <th>sex</th>\n",
+       "      <th>birth</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>c_4410</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1967</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>c_7839</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1975</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>c_1699</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1984</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>c_5961</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1962</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>c_5320</td>\n",
+       "      <td>m</td>\n",
+       "      <td>1943</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  client_id sex  birth\n",
+       "0    c_4410   f   1967\n",
+       "1    c_7839   f   1975\n",
+       "2    c_1699   f   1984\n",
+       "3    c_5961   f   1962\n",
+       "4    c_5320   m   1943"
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "customers = pd.read_csv(\"customers.csv\")\n",
+    "customers.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "_Descriptif des colonnes_ :  \n",
+    "    client_id -> un id est donné à chaque client  \n",
+    "    sex -> genre des clients  \n",
+    "    birth -> année de naissance des clients  "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "***csv products***"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>id_prod</th>\n",
+       "      <th>price</th>\n",
+       "      <th>categ</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>0_1421</td>\n",
+       "      <td>19.99</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>0_1368</td>\n",
+       "      <td>5.13</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>0_731</td>\n",
+       "      <td>17.99</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>1_587</td>\n",
+       "      <td>4.99</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>0_1507</td>\n",
+       "      <td>3.99</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  id_prod  price  categ\n",
+       "0  0_1421  19.99      0\n",
+       "1  0_1368   5.13      0\n",
+       "2   0_731  17.99      0\n",
+       "3   1_587   4.99      1\n",
+       "4  0_1507   3.99      0"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "products = pd.read_csv(\"products.csv\")\n",
+    "products.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "_Descriptif des colonnes_ :  \n",
+    "    id_prod -> un id est attribué à chaque produit  \n",
+    "    price -> prix des produits  \n",
+    "    categ -> catégorie des produits  "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "***csv transactions***"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>id_prod</th>\n",
+       "      <th>date</th>\n",
+       "      <th>session_id</th>\n",
+       "      <th>client_id</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>0_1483</td>\n",
+       "      <td>2021-04-10 18:37:28.723910</td>\n",
+       "      <td>s_18746</td>\n",
+       "      <td>c_4450</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>2_226</td>\n",
+       "      <td>2022-02-03 01:55:53.276402</td>\n",
+       "      <td>s_159142</td>\n",
+       "      <td>c_277</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>1_374</td>\n",
+       "      <td>2021-09-23 15:13:46.938559</td>\n",
+       "      <td>s_94290</td>\n",
+       "      <td>c_4270</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>0_2186</td>\n",
+       "      <td>2021-10-17 03:27:18.783634</td>\n",
+       "      <td>s_105936</td>\n",
+       "      <td>c_4597</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>0_1351</td>\n",
+       "      <td>2021-07-17 20:34:25.800563</td>\n",
+       "      <td>s_63642</td>\n",
+       "      <td>c_1242</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  id_prod                        date session_id client_id\n",
+       "0  0_1483  2021-04-10 18:37:28.723910    s_18746    c_4450\n",
+       "1   2_226  2022-02-03 01:55:53.276402   s_159142     c_277\n",
+       "2   1_374  2021-09-23 15:13:46.938559    s_94290    c_4270\n",
+       "3  0_2186  2021-10-17 03:27:18.783634   s_105936    c_4597\n",
+       "4  0_1351  2021-07-17 20:34:25.800563    s_63642    c_1242"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "transactions = pd.read_csv(\"transactions.csv\")\n",
+    "transactions.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "_Descriptif des colonnes_ :  \n",
+    "    id_prod -> id attribué à chaque produit  \n",
+    "    date -> date à laquelle la transaction a été effectuée  \n",
+    "    session_id -> session pendant laquelle il y a eu un achat  \n",
+    "    client_id -> id de l'acheteur "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "______________________________________________________________"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Mission n°1 - Nettoyage des données"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 1. Découverte des dataframes"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### 1. 1. Découverte du dataframe \"customers\""
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(8623, 3)"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# On détermine le nombre de clients (qui ont effectué un achat)\n",
+    "customers.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(4491, 3)"
+      ]
+     },
+     "execution_count": 8,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# On détermine la proportion clients du genre féminin\n",
+    "customers[customers[\"sex\"]==\"f\"].shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "count    8623.000000\n",
+       "mean     1978.280877\n",
+       "std        16.919535\n",
+       "min      1929.000000\n",
+       "25%      1966.000000\n",
+       "50%      1979.000000\n",
+       "75%      1992.000000\n",
+       "max      2004.000000\n",
+       "Name: birth, dtype: float64"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# On détermine la tranche d'année de naissance\n",
+    "customers[\"birth\"].describe()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    ">> Il y a 8 623 clients, dont 4491 sont des femmes (soit 52% de femmes et 48% d'hommes). \n",
+    "Leurs années de naissance s'étendent de 1929 à 2004."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### 1. 2. Découverte du dataframe \"products\""
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(3287, 3)"
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# On détermine le nombre de produits\n",
+    "products.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([0, 1, 2])"
+      ]
+     },
+     "execution_count": 11,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# On détermine le nombre de catégories de produits\n",
+    "products[\"categ\"].unique()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "count    3287.000000\n",
+       "mean       21.856641\n",
+       "std        29.847908\n",
+       "min        -1.000000\n",
+       "25%         6.990000\n",
+       "50%        13.060000\n",
+       "75%        22.990000\n",
+       "max       300.000000\n",
+       "Name: price, dtype: float64"
+      ]
+     },
+     "execution_count": 12,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Données sur les prix\n",
+    "products[\"price\"].describe()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    ">> Il y a 3 287 produits dispersés en 3 catégories. \n",
+    "Les prix s'étendent de -1€ à 300€. Le prix moyen est d'environ 22€."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### 1. 3. Découverte du dataframe \"transactions\""
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(337016, 4)"
+      ]
+     },
+     "execution_count": 13,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# On détermine le nombre de transactions\n",
+    "transactions.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>id_prod</th>\n",
+       "      <th>date</th>\n",
+       "      <th>session_id</th>\n",
+       "      <th>client_id</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>count</th>\n",
+       "      <td>337016</td>\n",
+       "      <td>337016</td>\n",
+       "      <td>337016</td>\n",
+       "      <td>337016</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>unique</th>\n",
+       "      <td>3266</td>\n",
+       "      <td>336855</td>\n",
+       "      <td>169195</td>\n",
+       "      <td>8602</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>top</th>\n",
+       "      <td>1_369</td>\n",
+       "      <td>test_2021-03-01 02:30:02.237413</td>\n",
+       "      <td>s_0</td>\n",
+       "      <td>c_1609</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>freq</th>\n",
+       "      <td>1081</td>\n",
+       "      <td>13</td>\n",
+       "      <td>200</td>\n",
+       "      <td>12855</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "       id_prod                             date session_id client_id\n",
+       "count   337016                           337016     337016    337016\n",
+       "unique    3266                           336855     169195      8602\n",
+       "top      1_369  test_2021-03-01 02:30:02.237413        s_0    c_1609\n",
+       "freq      1081                               13        200     12855"
+      ]
+     },
+     "execution_count": 14,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Données sur les transactions\n",
+    "transactions.describe()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    ">> 337 016 transactions ont été effectuées."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "On constate ici qu'une ligne est présente 200 fois (session s_0)\n",
+    "* Hypothèse : cette session correspond à des tests"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "------"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 2. Nettoyage des données"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Vérification de notre hypothèse, selon laquelle la session s_0 correspond à des tests."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>id_prod</th>\n",
+       "      <th>date</th>\n",
+       "      <th>session_id</th>\n",
+       "      <th>client_id</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>1431</th>\n",
+       "      <td>T_0</td>\n",
+       "      <td>test_2021-03-01 02:30:02.237420</td>\n",
+       "      <td>s_0</td>\n",
+       "      <td>ct_1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2365</th>\n",
+       "      <td>T_0</td>\n",
+       "      <td>test_2021-03-01 02:30:02.237446</td>\n",
+       "      <td>s_0</td>\n",
+       "      <td>ct_1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2895</th>\n",
+       "      <td>T_0</td>\n",
+       "      <td>test_2021-03-01 02:30:02.237414</td>\n",
+       "      <td>s_0</td>\n",
+       "      <td>ct_1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>5955</th>\n",
+       "      <td>T_0</td>\n",
+       "      <td>test_2021-03-01 02:30:02.237441</td>\n",
+       "      <td>s_0</td>\n",
+       "      <td>ct_0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>7283</th>\n",
+       "      <td>T_0</td>\n",
+       "      <td>test_2021-03-01 02:30:02.237434</td>\n",
+       "      <td>s_0</td>\n",
+       "      <td>ct_1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>...</th>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>332594</th>\n",
+       "      <td>T_0</td>\n",
+       "      <td>test_2021-03-01 02:30:02.237445</td>\n",
+       "      <td>s_0</td>\n",
+       "      <td>ct_0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>332705</th>\n",
+       "      <td>T_0</td>\n",
+       "      <td>test_2021-03-01 02:30:02.237423</td>\n",
+       "      <td>s_0</td>\n",
+       "      <td>ct_1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>332730</th>\n",
+       "      <td>T_0</td>\n",
+       "      <td>test_2021-03-01 02:30:02.237421</td>\n",
+       "      <td>s_0</td>\n",
+       "      <td>ct_1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>333442</th>\n",
+       "      <td>T_0</td>\n",
+       "      <td>test_2021-03-01 02:30:02.237431</td>\n",
+       "      <td>s_0</td>\n",
+       "      <td>ct_1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>335279</th>\n",
+       "      <td>T_0</td>\n",
+       "      <td>test_2021-03-01 02:30:02.237430</td>\n",
+       "      <td>s_0</td>\n",
+       "      <td>ct_0</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>200 rows × 4 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "       id_prod                             date session_id client_id\n",
+       "1431       T_0  test_2021-03-01 02:30:02.237420        s_0      ct_1\n",
+       "2365       T_0  test_2021-03-01 02:30:02.237446        s_0      ct_1\n",
+       "2895       T_0  test_2021-03-01 02:30:02.237414        s_0      ct_1\n",
+       "5955       T_0  test_2021-03-01 02:30:02.237441        s_0      ct_0\n",
+       "7283       T_0  test_2021-03-01 02:30:02.237434        s_0      ct_1\n",
+       "...        ...                              ...        ...       ...\n",
+       "332594     T_0  test_2021-03-01 02:30:02.237445        s_0      ct_0\n",
+       "332705     T_0  test_2021-03-01 02:30:02.237423        s_0      ct_1\n",
+       "332730     T_0  test_2021-03-01 02:30:02.237421        s_0      ct_1\n",
+       "333442     T_0  test_2021-03-01 02:30:02.237431        s_0      ct_1\n",
+       "335279     T_0  test_2021-03-01 02:30:02.237430        s_0      ct_0\n",
+       "\n",
+       "[200 rows x 4 columns]"
+      ]
+     },
+     "execution_count": 15,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# On observe plus en détails la session s_0 qui est suspecte\n",
+    "transactions.loc[transactions[\"session_id\"]==\"s_0\"]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Les 200 lignes de la session s_0 correspondent aux clients ct_0 et ct_1, qui correspondent à l'id produit T_0, qui correspond lui-même à des dates commençant par \"test\". Il faut donc les supprimer."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### 2. 1. Suppression des données suspectes"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "##### 2.1.1. Suppression du prix négatif"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>id_prod</th>\n",
+       "      <th>price</th>\n",
+       "      <th>categ</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>0_1421</td>\n",
+       "      <td>19.99</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>0_1368</td>\n",
+       "      <td>5.13</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>0_731</td>\n",
+       "      <td>17.99</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>1_587</td>\n",
+       "      <td>4.99</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>0_1507</td>\n",
+       "      <td>3.99</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  id_prod  price  categ\n",
+       "0  0_1421  19.99      0\n",
+       "1  0_1368   5.13      0\n",
+       "2   0_731  17.99      0\n",
+       "3   1_587   4.99      1\n",
+       "4  0_1507   3.99      0"
+      ]
+     },
+     "execution_count": 16,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# On a constaté qu'il y avait un prix négatif \"-1€\". Il convient de le supprimer\n",
+    "produits = products.loc[products[\"price\"]>=0]\n",
+    "produits.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "##### 2.1.2. Retrait des lignes \"test\" "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>id_prod</th>\n",
+       "      <th>date</th>\n",
+       "      <th>session_id</th>\n",
+       "      <th>client_id</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>0_1483</td>\n",
+       "      <td>2021-04-10 18:37:28.723910</td>\n",
+       "      <td>s_18746</td>\n",
+       "      <td>c_4450</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>2_226</td>\n",
+       "      <td>2022-02-03 01:55:53.276402</td>\n",
+       "      <td>s_159142</td>\n",
+       "      <td>c_277</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>1_374</td>\n",
+       "      <td>2021-09-23 15:13:46.938559</td>\n",
+       "      <td>s_94290</td>\n",
+       "      <td>c_4270</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>0_2186</td>\n",
+       "      <td>2021-10-17 03:27:18.783634</td>\n",
+       "      <td>s_105936</td>\n",
+       "      <td>c_4597</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>0_1351</td>\n",
+       "      <td>2021-07-17 20:34:25.800563</td>\n",
+       "      <td>s_63642</td>\n",
+       "      <td>c_1242</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  id_prod                        date session_id client_id\n",
+       "0  0_1483  2021-04-10 18:37:28.723910    s_18746    c_4450\n",
+       "1   2_226  2022-02-03 01:55:53.276402   s_159142     c_277\n",
+       "2   1_374  2021-09-23 15:13:46.938559    s_94290    c_4270\n",
+       "3  0_2186  2021-10-17 03:27:18.783634   s_105936    c_4597\n",
+       "4  0_1351  2021-07-17 20:34:25.800563    s_63642    c_1242"
+      ]
+     },
+     "execution_count": 17,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Retrait des 200 lignes suspectes dans le df transactions\n",
+    "transacts = transactions.loc[transactions[\"id_prod\"]!=\"T_0\"]\n",
+    "transacts.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>client_id</th>\n",
+       "      <th>sex</th>\n",
+       "      <th>birth</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>c_4410</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1967</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>c_7839</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1975</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>c_1699</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1984</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>c_5961</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1962</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>c_5320</td>\n",
+       "      <td>m</td>\n",
+       "      <td>1943</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  client_id sex  birth\n",
+       "0    c_4410   f   1967\n",
+       "1    c_7839   f   1975\n",
+       "2    c_1699   f   1984\n",
+       "3    c_5961   f   1962\n",
+       "4    c_5320   m   1943"
+      ]
+     },
+     "execution_count": 18,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Retrait des 200 lignes suspectes dans le df customers\n",
+    "clients_clean = customers.loc[(customers[\"client_id\"]!= \"ct_0\") \n",
+    "                        & (customers[\"client_id\"]!= \"ct_1\")]\n",
+    "clients_clean.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "##### 2.1.3. Travail sur les autres lignes nulles"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<class 'pandas.core.frame.DataFrame'>\n",
+      "Int64Index: 336816 entries, 0 to 336815\n",
+      "Data columns (total 6 columns):\n",
+      " #   Column      Non-Null Count   Dtype  \n",
+      "---  ------      --------------   -----  \n",
+      " 0   id_prod     336816 non-null  object \n",
+      " 1   date        336816 non-null  object \n",
+      " 2   session_id  336816 non-null  object \n",
+      " 3   client_id   336816 non-null  object \n",
+      " 4   price       336713 non-null  float64\n",
+      " 5   categ       336713 non-null  float64\n",
+      "dtypes: float64(2), object(4)\n",
+      "memory usage: 18.0+ MB\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Jointure entre les df produits et transactions afin de vérifier s'il n'y a pas d'autres données suspectes\n",
+    "transacts_produits = pd.merge(transacts,produits, on=\"id_prod\", how=\"left\")\n",
+    "transacts_produits.info()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "On remarque que les colonnes \"price\" et \"categ\" contiennent 103 lignes nulles. Il y a donc perte de données. On procède à son analyse afin de comprendre cette perte."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>id_prod</th>\n",
+       "      <th>date</th>\n",
+       "      <th>session_id</th>\n",
+       "      <th>client_id</th>\n",
+       "      <th>price</th>\n",
+       "      <th>categ</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>6231</th>\n",
+       "      <td>0_2245</td>\n",
+       "      <td>2021-06-17 03:03:12.668129</td>\n",
+       "      <td>s_49705</td>\n",
+       "      <td>c_1533</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>10797</th>\n",
+       "      <td>0_2245</td>\n",
+       "      <td>2021-06-16 05:53:01.627491</td>\n",
+       "      <td>s_49323</td>\n",
+       "      <td>c_7954</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>14045</th>\n",
+       "      <td>0_2245</td>\n",
+       "      <td>2021-11-24 17:35:59.911427</td>\n",
+       "      <td>s_124474</td>\n",
+       "      <td>c_5120</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>17480</th>\n",
+       "      <td>0_2245</td>\n",
+       "      <td>2022-02-28 18:08:49.875709</td>\n",
+       "      <td>s_172304</td>\n",
+       "      <td>c_4964</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>21071</th>\n",
+       "      <td>0_2245</td>\n",
+       "      <td>2021-03-01 00:09:29.301897</td>\n",
+       "      <td>s_3</td>\n",
+       "      <td>c_580</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "      id_prod                        date session_id client_id  price  categ\n",
+       "6231   0_2245  2021-06-17 03:03:12.668129    s_49705    c_1533    NaN    NaN\n",
+       "10797  0_2245  2021-06-16 05:53:01.627491    s_49323    c_7954    NaN    NaN\n",
+       "14045  0_2245  2021-11-24 17:35:59.911427   s_124474    c_5120    NaN    NaN\n",
+       "17480  0_2245  2022-02-28 18:08:49.875709   s_172304    c_4964    NaN    NaN\n",
+       "21071  0_2245  2021-03-01 00:09:29.301897        s_3     c_580    NaN    NaN"
+      ]
+     },
+     "execution_count": 20,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Localisation des lignes nulles\n",
+    "lignes_nulles = transacts_produits[transacts_produits.isnull().any(axis=1)]\n",
+    "lignes_nulles.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array(['0_2245'], dtype=object)"
+      ]
+     },
+     "execution_count": 21,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "lignes_nulles.id_prod.unique()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "On constate que cela vient uniquement du produit avec l'identifiant \"0_2245\". On vérifie alors si ce produit est bien présent dans le df produits et transactions."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>id_prod</th>\n",
+       "      <th>date</th>\n",
+       "      <th>session_id</th>\n",
+       "      <th>client_id</th>\n",
+       "      <th>price</th>\n",
+       "      <th>categ</th>\n",
+       "      <th>id_prod_produits</th>\n",
+       "      <th>client_id_transactions</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>0_1483</td>\n",
+       "      <td>2021-04-10 18:37:28.723910</td>\n",
+       "      <td>s_18746</td>\n",
+       "      <td>c_4450</td>\n",
+       "      <td>4.99</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>True</td>\n",
+       "      <td>True</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>2_226</td>\n",
+       "      <td>2022-02-03 01:55:53.276402</td>\n",
+       "      <td>s_159142</td>\n",
+       "      <td>c_277</td>\n",
+       "      <td>65.75</td>\n",
+       "      <td>2.0</td>\n",
+       "      <td>True</td>\n",
+       "      <td>True</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>1_374</td>\n",
+       "      <td>2021-09-23 15:13:46.938559</td>\n",
+       "      <td>s_94290</td>\n",
+       "      <td>c_4270</td>\n",
+       "      <td>10.71</td>\n",
+       "      <td>1.0</td>\n",
+       "      <td>True</td>\n",
+       "      <td>True</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>0_2186</td>\n",
+       "      <td>2021-10-17 03:27:18.783634</td>\n",
+       "      <td>s_105936</td>\n",
+       "      <td>c_4597</td>\n",
+       "      <td>4.20</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>True</td>\n",
+       "      <td>True</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>0_1351</td>\n",
+       "      <td>2021-07-17 20:34:25.800563</td>\n",
+       "      <td>s_63642</td>\n",
+       "      <td>c_1242</td>\n",
+       "      <td>8.99</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>True</td>\n",
+       "      <td>True</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  id_prod                        date session_id client_id  price  categ  \\\n",
+       "0  0_1483  2021-04-10 18:37:28.723910    s_18746    c_4450   4.99    0.0   \n",
+       "1   2_226  2022-02-03 01:55:53.276402   s_159142     c_277  65.75    2.0   \n",
+       "2   1_374  2021-09-23 15:13:46.938559    s_94290    c_4270  10.71    1.0   \n",
+       "3  0_2186  2021-10-17 03:27:18.783634   s_105936    c_4597   4.20    0.0   \n",
+       "4  0_1351  2021-07-17 20:34:25.800563    s_63642    c_1242   8.99    0.0   \n",
+       "\n",
+       "   id_prod_produits  client_id_transactions  \n",
+       "0              True                    True  \n",
+       "1              True                    True  \n",
+       "2              True                    True  \n",
+       "3              True                    True  \n",
+       "4              True                    True  "
+      ]
+     },
+     "execution_count": 22,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Vérification de la présence de l'id 0_2245\n",
+    "id_produits = transacts_produits.copy()\n",
+    "id_produits['id_prod_produits'] = id_produits['id_prod'].isin(produits['id_prod'])\n",
+    "id_produits['client_id_transactions'] = id_produits['client_id'].isin(transactions['client_id'])\n",
+    "id_produits.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         price  categ  id_prod_produits  client_id_transactions\n",
+      "id_prod                                                        \n",
+      "0_2245     NaN    NaN             False                    True\n"
+     ]
+    }
+   ],
+   "source": [
+    "# On affiche les données \"False\"\n",
+    "id_prod_false = id_produits[id_produits['id_prod_produits'] == False]\n",
+    "id_prod_false = id_prod_false.groupby('id_prod').mean()\n",
+    "print(id_prod_false)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "On constate ainsi que le produit \"0_2245\" n'est pas présent dans le df produits mais l'est dans le df transactions.  \n",
+    "On remarque que le produit 0_2245 n'a pas de référence dans le tableau produits (prix et catégorie) mais qu'il a été acheté 103 fois (transactions). On peut par conséquent déterminer les valeurs manquantes en l'estimant par la moyenne des valeurs (imputation par la moyenne).  \n",
+    "On peut supposer que le premier chiffre de chaque identifiant produit correspond à sa catégorie. On vérifie cette hypothèse, le produit 0_2245 appartient à la catégorie 0."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "count     3286\n",
+       "unique       1\n",
+       "top       True\n",
+       "freq      3286\n",
+       "dtype: object"
+      ]
+     },
+     "execution_count": 24,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Vérification de l'hypothèse 0 = catégorie 0\n",
+    "(produits[\"id_prod\"].str[0].astype(int)==produits[\"categ\"]).describe()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Hypothèse validée : le premier chiffre devant l'identifiant du produit correspond au numéro de la catégorie. On procède donc à l'imputation par la moyenne."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>price</th>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>categ</th>\n",
+       "      <th></th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0.0</th>\n",
+       "      <td>10.646828</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1.0</th>\n",
+       "      <td>20.480106</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2.0</th>\n",
+       "      <td>75.174949</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "           price\n",
+       "categ           \n",
+       "0.0    10.646828\n",
+       "1.0    20.480106\n",
+       "2.0    75.174949"
+      ]
+     },
+     "execution_count": 25,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Calcul du prix moyen de chaque catégorie\n",
+    "transacts_produits.groupby(by=\"categ\").mean()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<class 'pandas.core.frame.DataFrame'>\n",
+      "Int64Index: 336816 entries, 0 to 336815\n",
+      "Data columns (total 6 columns):\n",
+      " #   Column      Non-Null Count   Dtype  \n",
+      "---  ------      --------------   -----  \n",
+      " 0   id_prod     336816 non-null  object \n",
+      " 1   date        336816 non-null  object \n",
+      " 2   session_id  336816 non-null  object \n",
+      " 3   client_id   336816 non-null  object \n",
+      " 4   price       336816 non-null  float64\n",
+      " 5   categ       336816 non-null  float64\n",
+      "dtypes: float64(2), object(4)\n",
+      "memory usage: 18.0+ MB\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Imputation par la moyenne\n",
+    "transacts_produits[\"categ\"] = transacts_produits[[\"categ\"]].fillna(value=0)\n",
+    "transacts_produits[\"price\"] = transacts_produits[[\"price\"]].fillna(value=10.646828)\n",
+    "transacts_produits.info() # on constate qu'il n'y a plus de lignes nulles"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "----"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 3. Création de dataframes nettoyés"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Une fois le nettoyage des données terminé, on procède à leur enregistrement afin de procéder par la suite à l'analyse des données. On crée 4 fichiers."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### 3. 1. Création d'un dataframe unique"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>id_prod</th>\n",
+       "      <th>date</th>\n",
+       "      <th>session_id</th>\n",
+       "      <th>client_id</th>\n",
+       "      <th>price</th>\n",
+       "      <th>categ</th>\n",
+       "      <th>sex</th>\n",
+       "      <th>birth</th>\n",
+       "      <th>age</th>\n",
+       "      <th>tranche_age</th>\n",
+       "      <th>jour</th>\n",
+       "      <th>mois</th>\n",
+       "      <th>heure</th>\n",
+       "      <th>moment jour</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>0_1483</td>\n",
+       "      <td>2021 04 10</td>\n",
+       "      <td>s_18746</td>\n",
+       "      <td>c_4450</td>\n",
+       "      <td>4.99</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1977</td>\n",
+       "      <td>45</td>\n",
+       "      <td>31-50</td>\n",
+       "      <td>10</td>\n",
+       "      <td>4</td>\n",
+       "      <td>18</td>\n",
+       "      <td>Après-midi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>2_226</td>\n",
+       "      <td>2022 02 03</td>\n",
+       "      <td>s_159142</td>\n",
+       "      <td>c_277</td>\n",
+       "      <td>65.75</td>\n",
+       "      <td>2.0</td>\n",
+       "      <td>f</td>\n",
+       "      <td>2000</td>\n",
+       "      <td>22</td>\n",
+       "      <td>19-30</td>\n",
+       "      <td>3</td>\n",
+       "      <td>2</td>\n",
+       "      <td>1</td>\n",
+       "      <td>Soir</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>1_374</td>\n",
+       "      <td>2021 09 23</td>\n",
+       "      <td>s_94290</td>\n",
+       "      <td>c_4270</td>\n",
+       "      <td>10.71</td>\n",
+       "      <td>1.0</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1979</td>\n",
+       "      <td>43</td>\n",
+       "      <td>31-50</td>\n",
+       "      <td>23</td>\n",
+       "      <td>9</td>\n",
+       "      <td>15</td>\n",
+       "      <td>Après-midi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>0_2186</td>\n",
+       "      <td>2021 10 17</td>\n",
+       "      <td>s_105936</td>\n",
+       "      <td>c_4597</td>\n",
+       "      <td>4.20</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>m</td>\n",
+       "      <td>1963</td>\n",
+       "      <td>59</td>\n",
+       "      <td>51-70</td>\n",
+       "      <td>17</td>\n",
+       "      <td>10</td>\n",
+       "      <td>3</td>\n",
+       "      <td>Soir</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>0_1351</td>\n",
+       "      <td>2021 07 17</td>\n",
+       "      <td>s_63642</td>\n",
+       "      <td>c_1242</td>\n",
+       "      <td>8.99</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1980</td>\n",
+       "      <td>42</td>\n",
+       "      <td>31-50</td>\n",
+       "      <td>17</td>\n",
+       "      <td>7</td>\n",
+       "      <td>20</td>\n",
+       "      <td>Après-midi</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  id_prod        date session_id client_id  price  categ sex  birth  age  \\\n",
+       "0  0_1483  2021 04 10    s_18746    c_4450   4.99    0.0   f   1977   45   \n",
+       "1   2_226  2022 02 03   s_159142     c_277  65.75    2.0   f   2000   22   \n",
+       "2   1_374  2021 09 23    s_94290    c_4270  10.71    1.0   f   1979   43   \n",
+       "3  0_2186  2021 10 17   s_105936    c_4597   4.20    0.0   m   1963   59   \n",
+       "4  0_1351  2021 07 17    s_63642    c_1242   8.99    0.0   f   1980   42   \n",
+       "\n",
+       "  tranche_age  jour  mois  heure moment jour  \n",
+       "0       31-50    10     4     18  Après-midi  \n",
+       "1       19-30     3     2      1        Soir  \n",
+       "2       31-50    23     9     15  Après-midi  \n",
+       "3       51-70    17    10      3        Soir  \n",
+       "4       31-50    17     7     20  Après-midi  "
+      ]
+     },
+     "execution_count": 27,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "rester_livres = pd.merge(transacts_produits, clients_clean, \n",
+    "                         on=\"client_id\", how=\"left\")\n",
+    "rester_livres.head()\n",
+    "\n",
+    "#Ajout de la colonne âge\n",
+    "rester_livres[\"age\"]= 2022 - rester_livres[\"birth\"]\n",
+    "\n",
+    "#Ajout de la colonne tranche_age\n",
+    "def tranche_age(age):\n",
+    "    tranches = [\n",
+    "        {'bornes': (0,18), 'label': '18-'},\n",
+    "        {'bornes': (19,30), 'label': '19-30'},\n",
+    "        {'bornes': (31,50), 'label': '31-50'},\n",
+    "        {'bornes': (51,70), 'label': '51-70'},\n",
+    "        {'bornes': (71,120),'label': '71+'}\n",
+    "    ]\n",
+    "    for t in tranches:\n",
+    "        if t['bornes'][0] <= age <= t['bornes'][1]:\n",
+    "            return t['label']\n",
+    "        \n",
+    "rester_livres['tranche_age'] = rester_livres['age'].apply(tranche_age)\n",
+    "\n",
+    "# Ajout des colonnes pour les jours et moments de la journée\n",
+    "rester_livres['date'] = pd.to_datetime(rester_livres['date'])\n",
+    "\n",
+    "rester_livres['jour'] = rester_livres['date'].map(lambda d: d.day)\n",
+    "rester_livres['mois'] = rester_livres['date'].map(lambda d: d.month)\n",
+    "rester_livres['heure'] = rester_livres['date'].map(lambda d: d.hour)\n",
+    "\n",
+    "def moment_jour(value):\n",
+    "    if 14 <= value < 22:\n",
+    "        return 'Après-midi'\n",
+    "    elif 6 <= value < 14:\n",
+    "        return 'Matin'\n",
+    "    else:\n",
+    "        return 'Soir'\n",
+    "\n",
+    "rester_livres['moment jour'] = rester_livres['heure'].map(moment_jour)\n",
+    "\n",
+    "rester_livres['date'] = rester_livres['date'].dt.strftime('%Y %m %d')\n",
+    "rester_livres.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Enregistrement au format csv\n",
+    "rester_livres.to_csv(\"/Users/anissa/rester_livres.csv\", index=False)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### 3. 2. Création d'un dataframe pour les clients (ayant effectué un achat)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>client_id</th>\n",
+       "      <th>sex_x</th>\n",
+       "      <th>birth_x</th>\n",
+       "      <th>id_prod</th>\n",
+       "      <th>date</th>\n",
+       "      <th>session_id</th>\n",
+       "      <th>price</th>\n",
+       "      <th>categ</th>\n",
+       "      <th>sex_y</th>\n",
+       "      <th>birth_y</th>\n",
+       "      <th>age</th>\n",
+       "      <th>tranche_age</th>\n",
+       "      <th>jour</th>\n",
+       "      <th>mois</th>\n",
+       "      <th>heure</th>\n",
+       "      <th>moment jour</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>c_4410</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1967</td>\n",
+       "      <td>0_1455</td>\n",
+       "      <td>2021 03 22</td>\n",
+       "      <td>s_9942</td>\n",
+       "      <td>8.99</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1967</td>\n",
+       "      <td>55</td>\n",
+       "      <td>51-70</td>\n",
+       "      <td>22</td>\n",
+       "      <td>3</td>\n",
+       "      <td>14</td>\n",
+       "      <td>Après-midi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>c_4410</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1967</td>\n",
+       "      <td>0_1376</td>\n",
+       "      <td>2021 09 24</td>\n",
+       "      <td>s_94984</td>\n",
+       "      <td>16.24</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1967</td>\n",
+       "      <td>55</td>\n",
+       "      <td>51-70</td>\n",
+       "      <td>24</td>\n",
+       "      <td>9</td>\n",
+       "      <td>22</td>\n",
+       "      <td>Soir</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>c_4410</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1967</td>\n",
+       "      <td>1_312</td>\n",
+       "      <td>2022 01 29</td>\n",
+       "      <td>s_156960</td>\n",
+       "      <td>24.56</td>\n",
+       "      <td>1.0</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1967</td>\n",
+       "      <td>55</td>\n",
+       "      <td>51-70</td>\n",
+       "      <td>29</td>\n",
+       "      <td>1</td>\n",
+       "      <td>14</td>\n",
+       "      <td>Après-midi</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>c_4410</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1967</td>\n",
+       "      <td>1_653</td>\n",
+       "      <td>2021 07 29</td>\n",
+       "      <td>s_68860</td>\n",
+       "      <td>25.99</td>\n",
+       "      <td>1.0</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1967</td>\n",
+       "      <td>55</td>\n",
+       "      <td>51-70</td>\n",
+       "      <td>29</td>\n",
+       "      <td>7</td>\n",
+       "      <td>23</td>\n",
+       "      <td>Soir</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>c_4410</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1967</td>\n",
+       "      <td>0_1110</td>\n",
+       "      <td>2021 11 04</td>\n",
+       "      <td>s_114715</td>\n",
+       "      <td>4.71</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1967</td>\n",
+       "      <td>55</td>\n",
+       "      <td>51-70</td>\n",
+       "      <td>4</td>\n",
+       "      <td>11</td>\n",
+       "      <td>16</td>\n",
+       "      <td>Après-midi</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  client_id sex_x  birth_x id_prod        date session_id  price  categ sex_y  \\\n",
+       "0    c_4410     f     1967  0_1455  2021 03 22     s_9942   8.99    0.0     f   \n",
+       "1    c_4410     f     1967  0_1376  2021 09 24    s_94984  16.24    0.0     f   \n",
+       "2    c_4410     f     1967   1_312  2022 01 29   s_156960  24.56    1.0     f   \n",
+       "3    c_4410     f     1967   1_653  2021 07 29    s_68860  25.99    1.0     f   \n",
+       "4    c_4410     f     1967  0_1110  2021 11 04   s_114715   4.71    0.0     f   \n",
+       "\n",
+       "   birth_y  age tranche_age  jour  mois  heure moment jour  \n",
+       "0     1967   55       51-70    22     3     14  Après-midi  \n",
+       "1     1967   55       51-70    24     9     22        Soir  \n",
+       "2     1967   55       51-70    29     1     14  Après-midi  \n",
+       "3     1967   55       51-70    29     7     23        Soir  \n",
+       "4     1967   55       51-70     4    11     16  Après-midi  "
+      ]
+     },
+     "execution_count": 29,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Jointure entre le df clients_clients et rester_livres\n",
+    "clients_achat = pd.merge(clients_clean, rester_livres, \n",
+    "                         how=\"inner\",on=\"client_id\")\n",
+    "clients_achat.head() # sauvegarde des données clients"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>client_id</th>\n",
+       "      <th>sex</th>\n",
+       "      <th>birth</th>\n",
+       "      <th>price</th>\n",
+       "      <th>categ</th>\n",
+       "      <th>id_prod</th>\n",
+       "      <th>session_id</th>\n",
+       "      <th>date</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>c_4410</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1967</td>\n",
+       "      <td>8.99</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0_1455</td>\n",
+       "      <td>s_9942</td>\n",
+       "      <td>2021 03 22</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>c_4410</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1967</td>\n",
+       "      <td>16.24</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0_1376</td>\n",
+       "      <td>s_94984</td>\n",
+       "      <td>2021 09 24</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>c_4410</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1967</td>\n",
+       "      <td>24.56</td>\n",
+       "      <td>1.0</td>\n",
+       "      <td>1_312</td>\n",
+       "      <td>s_156960</td>\n",
+       "      <td>2022 01 29</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>c_4410</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1967</td>\n",
+       "      <td>25.99</td>\n",
+       "      <td>1.0</td>\n",
+       "      <td>1_653</td>\n",
+       "      <td>s_68860</td>\n",
+       "      <td>2021 07 29</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>c_4410</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1967</td>\n",
+       "      <td>4.71</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>0_1110</td>\n",
+       "      <td>s_114715</td>\n",
+       "      <td>2021 11 04</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  client_id sex  birth  price  categ id_prod session_id        date\n",
+       "0    c_4410   f   1967   8.99    0.0  0_1455     s_9942  2021 03 22\n",
+       "1    c_4410   f   1967  16.24    0.0  0_1376    s_94984  2021 09 24\n",
+       "2    c_4410   f   1967  24.56    1.0   1_312   s_156960  2022 01 29\n",
+       "3    c_4410   f   1967  25.99    1.0   1_653    s_68860  2021 07 29\n",
+       "4    c_4410   f   1967   4.71    0.0  0_1110   s_114715  2021 11 04"
+      ]
+     },
+     "execution_count": 30,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Création du df clients\n",
+    "clients_list = [\"client_id\",\"sex_x\",\"birth_x\",\n",
+    "                \"price\", \"categ\",\"id_prod\",\n",
+    "                \"session_id\",\"date\"]\n",
+    "\n",
+    "clients = clients_achat[clients_list] # données dont on a besoin\n",
+    "\n",
+    "clients = clients.rename(columns={\"sex_x\":\"sex\",\"birth_x\":\"birth\"})\n",
+    "clients.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 31,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Enregistrement au format csv\n",
+    "clients.to_csv(\"/Users/anissa/clients.csv\", index=False)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### 3.3. Création d'un dataframe pour les visiteurs (n'ayant pas effectué d'achat)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 32,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Jointure entre les différents df\n",
+    "df_visiteurs = pd.merge(left=products,right=transactions,\n",
+    "                        how=\"outer\",on=\"id_prod\")\n",
+    "df_visiteurs = pd.merge(left=customers,right=df_visiteurs, \n",
+    "                        how=\"outer\",on=\"client_id\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 33,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>client_id</th>\n",
+       "      <th>sex</th>\n",
+       "      <th>birth</th>\n",
+       "      <th>id_prod</th>\n",
+       "      <th>price</th>\n",
+       "      <th>categ</th>\n",
+       "      <th>date</th>\n",
+       "      <th>session_id</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>2678</th>\n",
+       "      <td>c_4505</td>\n",
+       "      <td>m</td>\n",
+       "      <td>1976.0</td>\n",
+       "      <td>0_2245</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>2022-01-09 09:23:31.000720</td>\n",
+       "      <td>s_147220</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2968</th>\n",
+       "      <td>c_3468</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1981.0</td>\n",
+       "      <td>0_2245</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>2021-09-11 10:52:05.205583</td>\n",
+       "      <td>s_88251</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>6683</th>\n",
+       "      <td>c_1403</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1978.0</td>\n",
+       "      <td>0_2245</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>2022-02-15 14:26:50.187952</td>\n",
+       "      <td>s_165575</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>8386</th>\n",
+       "      <td>c_3065</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1977.0</td>\n",
+       "      <td>0_2245</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>2022-01-26 13:34:33.440366</td>\n",
+       "      <td>s_155484</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>9457</th>\n",
+       "      <td>c_7102</td>\n",
+       "      <td>m</td>\n",
+       "      <td>1983.0</td>\n",
+       "      <td>0_2245</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>2021-04-25 19:58:42.716401</td>\n",
+       "      <td>s_25704</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "     client_id sex   birth id_prod  price  categ                        date  \\\n",
+       "2678    c_4505   m  1976.0  0_2245    NaN    NaN  2022-01-09 09:23:31.000720   \n",
+       "2968    c_3468   f  1981.0  0_2245    NaN    NaN  2021-09-11 10:52:05.205583   \n",
+       "6683    c_1403   f  1978.0  0_2245    NaN    NaN  2022-02-15 14:26:50.187952   \n",
+       "8386    c_3065   f  1977.0  0_2245    NaN    NaN  2022-01-26 13:34:33.440366   \n",
+       "9457    c_7102   m  1983.0  0_2245    NaN    NaN  2021-04-25 19:58:42.716401   \n",
+       "\n",
+       "     session_id  \n",
+       "2678   s_147220  \n",
+       "2968    s_88251  \n",
+       "6683   s_165575  \n",
+       "8386   s_155484  \n",
+       "9457    s_25704  "
+      ]
+     },
+     "execution_count": 33,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# On localise les données nulles de notre jointure\n",
+    "df_na = df_visiteurs[df_visiteurs.isnull().any(axis=1)]\n",
+    "df_na.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 34,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array(['c_8253', 'c_3789', 'c_4406', 'c_2706', 'c_3443', 'c_4447',\n",
+       "       'c_3017', 'c_4086', 'c_6930', 'c_4358', 'c_8381', 'c_1223',\n",
+       "       'c_6862', 'c_5245', 'c_5223', 'c_6735', 'c_862', 'c_7584', 'c_90',\n",
+       "       'c_587', 'c_3526'], dtype=object)"
+      ]
+     },
+     "execution_count": 34,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# On localise les id des visiteurs\n",
+    "visiteurs_sans_achat = df_na.loc[df_visiteurs.id_prod.isnull(),\n",
+    "                                         \"client_id\"].unique()\n",
+    "visiteurs_sans_achat"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 35,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>client_id</th>\n",
+       "      <th>sex</th>\n",
+       "      <th>birth</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>29516</th>\n",
+       "      <td>c_8253</td>\n",
+       "      <td>f</td>\n",
+       "      <td>2001.0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>99355</th>\n",
+       "      <td>c_3789</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1997.0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>108189</th>\n",
+       "      <td>c_4406</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1998.0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>109402</th>\n",
+       "      <td>c_2706</td>\n",
+       "      <td>f</td>\n",
+       "      <td>1967.0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>112024</th>\n",
+       "      <td>c_3443</td>\n",
+       "      <td>m</td>\n",
+       "      <td>1959.0</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "       client_id sex   birth\n",
+       "29516     c_8253   f  2001.0\n",
+       "99355     c_3789   f  1997.0\n",
+       "108189    c_4406   f  1998.0\n",
+       "109402    c_2706   f  1967.0\n",
+       "112024    c_3443   m  1959.0"
+      ]
+     },
+     "execution_count": 35,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# On crée le df contenant les visiteurs n'ayant pas effectué d'achat\n",
+    "visiteurs = df_visiteurs.loc[df_visiteurs[\"client_id\"]\n",
+    "                            .isin(visiteurs_sans_achat),\n",
+    "                             [\"client_id\",\"sex\",\"birth\"]]\n",
+    "visiteurs.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 36,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Enregistrement au format csv\n",
+    "visiteurs.to_csv(\"/Users/anissa/visiteurs.csv\", index=False)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### 3. 4. Création d'un dataframe pour les produits invendus"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 37,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array(['0_1016', '0_1780', '0_1062', '0_1119', '0_1014', '1_0', '0_1318',\n",
+       "       '0_1800', '0_1645', '0_322', '0_1620', '0_1025', '2_87', '1_394',\n",
+       "       '2_72', '0_310', '0_1624', '0_525', '2_86', '0_299', '0_510',\n",
+       "       '0_2308'], dtype=object)"
+      ]
+     },
+     "execution_count": 37,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# On localise les données nulles de notre df\n",
+    "p_invendus = df_na.loc[df_visiteurs.client_id.isnull(),\"id_prod\"].unique()\n",
+    "p_invendus"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 38,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>id_prod</th>\n",
+       "      <th>categ</th>\n",
+       "      <th>price</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>337037</th>\n",
+       "      <td>0_1016</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>35.06</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>337038</th>\n",
+       "      <td>0_1780</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>1.67</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>337039</th>\n",
+       "      <td>0_1062</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>20.08</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>337040</th>\n",
+       "      <td>0_1119</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>2.99</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>337041</th>\n",
+       "      <td>0_1014</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>1.15</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "       id_prod  categ  price\n",
+       "337037  0_1016    0.0  35.06\n",
+       "337038  0_1780    0.0   1.67\n",
+       "337039  0_1062    0.0  20.08\n",
+       "337040  0_1119    0.0   2.99\n",
+       "337041  0_1014    0.0   1.15"
+      ]
+     },
+     "execution_count": 38,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# On crée le df des produits invendus\n",
+    "produits_invendus = df_visiteurs.loc[df_visiteurs[\"id_prod\"]\n",
+    "                                     .isin(p_invendus), \n",
+    "                                     [\"id_prod\",\"categ\",\"price\"]]\n",
+    "produits_invendus.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 39,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Enregistrement au format csv\n",
+    "produits_invendus.to_csv(\"/Users/anissa/produits_invendus.csv\", index=False)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 4. Enregistrement des données nettoyées"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 40,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "produits.to_csv(\"/Users/anissa/produits.csv\", index=False)\n",
+    "transacts.to_csv(\"/Users/anissa/transacts.csv\", index=False)\n",
+    "clients_clean.to_csv(\"/Users/anissa/clients_clean.csv\", index=False)\n",
+    "transacts_produits.to_csv(\"/Users/anissa/transacts_produits.csv\", index=False)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.5"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
