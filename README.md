@@ -17,7 +17,7 @@ Ce projet a été réalisé grâce au langage informatique, _Python_.
   * PowerPoint
 Les deux scripts pourront ainsi être ouverts grâce à Jupyter ou JupyterLab, au choix. 
 
-Le projet intituté "_Analyse des ventes_" est composé de deux scripts : le premier contient le [nettoyage du jeu de données](https://github.com/anissalaza/Analyse-des-ventes/blob/f1bad10f1816501218e18c12f14d558383925957/Analyse%20des%20ventes.ipynb) et le second, lui, contient l'[analyse de ces données](https://github.com/anissalaza/Analyse-des-ventes/blob/f1bad10f1816501218e18c12f14d558383925957/Nettoyage%20des%20donn%C3%A9es.ipynb). Les résultats ont été présentés lors d'une [soutenance](https://github.com/anissalaza/Analyse-des-ventes/blob/f1bad10f1816501218e18c12f14d558383925957/Soutenance.pdf) évaluée par un examinateur.
+Le projet intituté "_Analyse des ventes_" est composé de deux scripts : le premier contient le [nettoyage du jeu de données](https://github.com/anissalaza/Analyse-des-ventes/blob/f1bad10f1816501218e18c12f14d558383925957/Analyse%20des%20ventes.ipynb) et le second, lui, contient l'[analyse des ventes](https://github.com/anissalaza/Analyse-des-ventes/blob/f1bad10f1816501218e18c12f14d558383925957/Nettoyage%20des%20donn%C3%A9es.ipynb). Les résultats ont été présentés lors d'une [soutenance](https://github.com/anissalaza/Analyse-des-ventes/blob/f1bad10f1816501218e18c12f14d558383925957/Soutenance.pdf) évaluée par un examinateur.
 
 ------------------------------------------------
 
@@ -26,7 +26,7 @@ Le projet intituté "_Analyse des ventes_" est composé de deux scripts : le pre
 #### *Nettoyage des données*
 Ce fichier contient le **notebook Jupyter** permettant d'effectuer le nettoyage des données.
 
-#### *Analyse des données*
+#### *Analyse des ventes*
 Ce **notebook Jupyter** contient l'analyse des données et des corrélations.
 
 #### *Graphiques*
